@@ -12,13 +12,55 @@ Many of the categories listed here require you to enable the <PlatformLink to="/
 
 ## HTTP Headers
 
-By default, the Sentry SDK sends HTTP response or request headers.
+<PlatformSection notSupported={["javascript.node", "javascript.aws-lambda", "javascript.azure-functions", "javascript.connect", "javascript.express", "javascript.fastify", "javascript.gcp-functions", "javascript.hapi", "javascript.hono", "javascript.koa", "javascript.nitro", "javascript.nestjs", "javascript.deno", "javascript.cloudflare", "javascript.bun"]}>
+
+By default, the Sentry SDK does **not** capture HTTP request or response headers.
+
+The <PlatformLink to="/configuration/integrations/httpclient/">HttpClient Integration</PlatformLink> captures headers from outgoing fetch and XHR requests that return a failed status code (500–599 by default). To enable header collection, set `sendDefaultPii: true` in your `Sentry.init()` config.
+
+When `sendDefaultPii` is enabled:
+
+- **Fetch requests**: All request and response header names are captured. Sensitive values (such as `authorization`, `x-api-key`, and `x-auth-token`) are automatically redacted to `[Filtered]`.
+- **XHR requests**: All request and response header names are captured, with the same automatic redaction of sensitive values.However, request cookies (from the `Cookie` header) cannot be read due to browser XHR API limitations. Only response cookies (from `Set-Cookie`) are available.
+
+<Alert>
+
+Header collection is best-effort due to Fetch and XHR API limitations. Certain headers may be missing even when `sendDefaultPii` is enabled.
+
+</Alert>
+
+</PlatformSection>
+
+<PlatformSection notSupported={["javascript", "javascript.angular", "javascript.capacitor", "javascript.cordova", "javascript.ember", "javascript.gatsby", "javascript.react", "javascript.solid", "javascript.svelte", "javascript.vue", "javascript.wasm", "javascript.cloudflare", "javascript.deno"]}>
+
+On the server-side, incoming request headers (and outgoing response headers) are added as span attributes by the <PlatformLink to="/configuration/integrations/http/">Http Integration</PlatformLink> **by default**.
+Sensitive values (such as auth tokens and secrets) and PII headers (such as forwarding and IP headers) are automatically filtered.
+Setting `sendDefaultPii: true` relaxes the PII-header filtering so those headers are captured too. Sensitive keys remain filtered regardless.
+You can configure request headers, response headers, and cookies independently using the `dataCollection` option.
+
+</PlatformSection>
 
 ## Cookies
 
+<PlatformSection notSupported={["javascript.node", "javascript.aws-lambda", "javascript.azure-functions", "javascript.connect", "javascript.express", "javascript.fastify", "javascript.gcp-functions", "javascript.hapi", "javascript.hono", "javascript.koa", "javascript.nitro", "javascript.nestjs", "javascript.deno", "javascript.cloudflare", "javascript.bun"]}>
+
 By default, the Sentry SDK doesn't send cookies.
 
-If you want to send cookies, set `sendDefaultPii: true` in the `Sentry.init()` call. This will send the cookie headers `Cookie` and `Set-Cookie` from fetch and XHR requests.
+To capture cookies from outgoing requests, set `sendDefaultPii: true` in your `Sentry.init()` call. The <PlatformLink to="/configuration/integrations/httpclient/">HttpClient Integration</PlatformLink> will then capture:
+
+- **Fetch requests**: Both request cookies (from the `Cookie` header) and response cookies (from `Set-Cookie`).
+- **XHR requests**: Response cookies only (from `Set-Cookie`). Request cookies cannot be read from XHR requests due to browser API limitations.
+
+Sensitive cookie names are filtered automatically even when cookie collection is enabled.
+
+</PlatformSection>
+
+<PlatformSection notSupported={["javascript", "javascript.angular", "javascript.capacitor", "javascript.cordova", "javascript.ember", "javascript.gatsby", "javascript.react", "javascript.solid", "javascript.svelte", "javascript.vue", "javascript.wasm", "javascript.cloudflare", "javascript.deno"]}>
+
+On the server-side, set `sendDefaultPii: true` to capture cookies from incoming requests via the <PlatformLink to="/configuration/integrations/http/">Http Integration</PlatformLink>.
+Sensitive cookie names are filtered automatically even when cookie collection is enabled.
+
+</PlatformSection>
 
 ## Information About Logged-in User
 
@@ -28,7 +70,7 @@ The type of logged-in user information you'll be able to send depends on the int
 
 <PlatformSection supported={["javascript.electron"]}>
   ### Local Device User
-  
+
   By default, the Sentry SDK doesn't send any information about the user currently logged-in to the device where the app is running. However, you should exercise caution when logging file system errors as paths may contain the current username.
 </PlatformSection>
 
@@ -101,13 +143,13 @@ By default, the Sentry SDK sends information about the device and runtime to Sen
 </PlatformSection>
 
 <PlatformSection supported={["javascript.electron"]}>
-  The Sentry Electron SDK collects information about the device, such as the platform, architecture, available memory and version and build of your operating system or Linux distribution. 
-  
-  By default, the <PlatformLink to="/configuration/integrations/additionalcontext">Additional Context Integration</PlatformLink> collects dimensions and resolution of the device screen. It can optionally collect the device's manufacturer and model name if the `deviceModelManufacturer` option is enabled. 
-  
+  The Sentry Electron SDK collects information about the device, such as the platform, architecture, available memory and version and build of your operating system or Linux distribution.
+
+  By default, the <PlatformLink to="/configuration/integrations/additionalcontext">Additional Context Integration</PlatformLink> collects dimensions and resolution of the device screen. It can optionally collect the device's manufacturer and model name if the `deviceModelManufacturer` option is enabled.
+
   By default, the <PlatformLink to="/configuration/integrations/gpucontext">GPU Context Integration</PlatformLink> collects GPU information. It can optionally collect more detailed information if the `infoLevel` option is set to `complete`.
-  
-  
+
+
 </PlatformSection>
 
 <PlatformSection notSupported={["javascript.azure-functions", "javascript.bun", "javascript.deno", "javascript.node", "javascript.aws-lambda", "javascript.connect", "javascript.cloudflare", "javascript.express", "javascript.fastify", "javascript.gcp-functions", "javascript.hapi",  "javascript.hono", "javascript.koa", "javascript.nestjs", "javascript.nitro", "javascript.wasm"]}>
@@ -165,11 +207,11 @@ By default, the Sentry SDK sends information about the device and runtime to Sen
 <PlatformSection supported={["javascript.electron"]}>
 
   ## Window Titles
-  
+
   The <PlatformLink to="/configuration/integrations/electronbreadcrumbs/">Electron Breadcrumbs Integration</PlatformLink> can optionally capture the window titles for breadcrumbs related to windows events. These can potentially contain PII so are disabled by default but can be enabled via the `captureWindowTitles` option.
 
   ## Native Crashes
-  
+
   At the time of a native crash, the stack of each thread is collected and sent to Sentry as part of the Minidump snapshot. This information is sent to Sentry by default, but dropped after processing the event in the backend.
 
   These files are not stored by default, but you can [enable Minidump Storage](/platforms/native/guides/minidumps/enriching-events/attachments/#store-minidumps-as-attachments) in the Sentry organization or project settings.
