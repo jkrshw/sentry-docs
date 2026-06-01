@@ -21,7 +21,7 @@ The <PlatformLink to="/configuration/integrations/httpclient/">HttpClient Integr
 When `sendDefaultPii` is enabled:
 
 - **Fetch requests**: All request and response header names are captured. Sensitive values (such as `authorization`, `x-api-key`, and `x-auth-token`) are automatically redacted to `[Filtered]`.
-- **XHR requests**: All request and response header names are captured, with the same automatic redaction of sensitive values.However, request cookies (from the `Cookie` header) cannot be read due to browser XHR API limitations. Only response cookies (from `Set-Cookie`) are available.
+- **XHR requests**: All request and response header names are captured, with the same automatic redaction of sensitive values. However, request cookies (from the `Cookie` header) cannot be read due to browser XHR API limitations. Only response cookies (from `Set-Cookie`) are available.
 
 <Alert>
 
@@ -31,7 +31,7 @@ Header collection is best-effort due to Fetch and XHR API limitations. Certain h
 
 </PlatformSection>
 
-<PlatformSection notSupported={["javascript", "javascript.angular", "javascript.capacitor", "javascript.cordova", "javascript.ember", "javascript.gatsby", "javascript.react", "javascript.solid", "javascript.svelte", "javascript.vue", "javascript.wasm", "javascript.cloudflare", "javascript.deno"]}>
+<PlatformSection notSupported={["javascript", "javascript.angular", "javascript.capacitor", "javascript.cordova", "javascript.ember", "javascript.gatsby", "javascript.react", "javascript.solid", "javascript.svelte", "javascript.vue", "javascript.wasm"]}>
 
 On the server-side, incoming request headers (and outgoing response headers) are added as span attributes by the <PlatformLink to="/configuration/integrations/http/">Http Integration</PlatformLink> **by default**.
 Sensitive values (such as auth tokens and secrets) and PII headers (such as forwarding and IP headers) are automatically filtered.
